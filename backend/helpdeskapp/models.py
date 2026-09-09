@@ -44,12 +44,18 @@ class Report(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     sla_deadline = models.DateTimeField()
 
+    def __str__(self):
+        return f"{self.pk}. {self.title}"
+
 class Comment(models.Model):
     description = models.TextField(max_length=500)
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     is_inner = models.BooleanField(default=False)
     creation_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.author}: {self.description[:20]}"
 
 class Attachment(models.Model):
     file = models.FileField(upload_to="files")
@@ -59,6 +65,9 @@ class Attachment(models.Model):
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, null=True, blank=True)
     creation_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.file}"
+
 class ReportHistory(models.Model):
     report = models.ForeignKey(Report, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -67,9 +76,18 @@ class ReportHistory(models.Model):
     new_value = models.CharField(max_length=500)
     creation_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.report.title}: {self.field_name} - {self.new_value}"
+
 class Priorities(models.Model):
     priority = models.CharField(max_length=20, choices=Report.Priority.choices, unique=True)
     sla = models.PositiveIntegerField()
 
+    def __str__(self):
+        return f"{self.priority}: {self.sla}"
+
 class Settings(models.Model):
     days_until_closure = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.days_until_closure}"
