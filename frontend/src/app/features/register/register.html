@@ -2,11 +2,24 @@
 <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
     <label for="username">Nazwa użytkownika</label>
     <input type="text" formControlName="username" id="username">
+    @if (registerForm.get("username")?.errors?.["backend"]) {
+        <p>{{ registerForm.get("username")?.errors?.["backend"] }}</p>
+    }
     <label for="email">Adres email</label>
     <input type="email" formControlName="email" id="email">
+    @if (registerForm.get("email")?.errors?.["backend"]) {
+        <p>{{ registerForm.get("email")?.errors?.["backend"] }}</p>
+    }
     <label for="password">Hasło</label>
     <input type="password" formControlName="password" id="password">
+    @if (registerForm.get("password")?.errors?.["backend"]) {
+        <p>{{ registerForm.get("password")?.errors?.["backend"] }}</p>
+    }
     <label for="confirm_password">Potwierdź hasło</label>
-    <input type="password" formControlName="confirmPassword" id="confirm_password">
+    <input type="password" formControlName="confirm_password" id="confirm_password">
+    @if (registerForm.get("confirm_password")?.errors?.["backend"]) {
+        <p>{{ registerForm.get("confirm_password")?.errors?.["backend"] }}</p>
+    }
     <button type="submit">Zarejestruj się</button>
 </form>
+<a routerLink="/login">Logowanie</a>
