@@ -46,4 +46,8 @@ export class Auth {
         localStorage.removeItem("access_token")
         localStorage.removeItem("refresh_token")
     }
+
+    refreshAccessToken(refreshToken: string) {
+        return this.http.post<{ access: string }>(`${environment.apiUrl}/token/refresh/`, { refresh: refreshToken })
+    }
 }

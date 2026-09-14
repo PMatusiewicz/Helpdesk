@@ -2,8 +2,18 @@
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <label for="username">Nazwa użytkownika</label>
     <input type="text" formControlName="username" id="username">
+    @if (loginForm.get("username")?.errors?.["backend"]) {
+        <p>{{ loginForm.get("username")?.errors?.["backend"] }}</p>
+    }
     <label for="password">Hasło</label>
     <input type="password" formControlName="password" id="password">
+    @if (loginForm.get("password")?.errors?.["backend"]) {
+        <p>{{ loginForm.get("password")?.errors?.["backend"] }}</p>
+    }
     <button type="submit">Zaloguj się</button>
 </form>
+<button type="submit"(click)="getMeTest()">Test</button>
+@if (errorMessage()) {
+    <p>{{ errorMessage() }}</p>
+}
 <a routerLink="/register">Rejestracja</a>

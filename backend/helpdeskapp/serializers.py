@@ -6,7 +6,10 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "email", "password", "confirm_password"]
-        extra_kwargs = {"password": {"write_only": True}}
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "email": {"required": True, "allow_blank": False}
+        }
 
     def validate(self, attrs):
         if attrs["password"] != attrs["confirm_password"]:
