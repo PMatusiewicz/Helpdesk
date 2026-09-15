@@ -25,8 +25,7 @@ export class Login {
         this.auth.login(this.loginForm.value.username ?? "", this.loginForm.value.password ?? "").subscribe({
             next: (response) => {
                 this.auth.saveToken(response.access, response.refresh)
-                // this.router.navigate(["/dashboard"])
-                // TODO uncomment this after adding dashboard
+                this.router.navigate(["/dashboard"])
             },
             error: (err) => {
                 if (err.status == 401) {
@@ -42,11 +41,6 @@ export class Login {
                 }
                 this.cdr.markForCheck()
             }
-        })
-    }
-    getMeTest() {
-        this.auth.getMe().subscribe(response => {
-            console.log(response)
         })
     }
 }
