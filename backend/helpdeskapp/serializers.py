@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Report
 
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
@@ -25,3 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "email", "role"]
+
+class CreateReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ["title", "description", "category", "priority"]
