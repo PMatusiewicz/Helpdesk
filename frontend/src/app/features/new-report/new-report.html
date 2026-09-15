@@ -1,0 +1,23 @@
+<form [formGroup]="reportForm" (ngSubmit)="onSubmit()">
+    <label for="title">Tytuł</label>
+    <input type="text" id="title" formControlName="title">
+    <label for="description">Opis</label>
+    <textarea id="description" formControlName="description"></textarea>
+    <label for="category">Kategoria</label>
+    <select id="category" formControlName="category">
+        @for (category of categories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+        }
+    </select>
+    <label for="priority">Priorytet</label>
+    <select id="priority" formControlName="priority">
+        <option value="CRITICAL">Krytyczny</option>
+        <option value="HIGH">Wysoki</option>
+        <option value="MEDIUM">Średni</option>
+        <option value="LOW">Niski</option>
+    </select>
+    <button type="submit">Utwórz</button>
+</form>
+@if (errorMessage()) {
+    <p>{{ errorMessage() }}</p>
+}

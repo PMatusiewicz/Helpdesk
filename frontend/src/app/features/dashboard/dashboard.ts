@@ -27,6 +27,6 @@ export class Dashboard {
     }
 
     newReport() {
-        // 
+        this.router.navigate(["reports/new"])
     }
 }

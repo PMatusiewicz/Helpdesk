@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { environment } from '../../environments/environment';
 
-interface CategoryResponse {
+export interface CategoryResponse {
     id: number
     name: string
 }
