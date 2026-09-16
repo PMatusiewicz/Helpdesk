@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Report
+from .models import User, Report, Category
 
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
@@ -30,3 +30,23 @@ class CreateReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = ["title", "description", "category", "priority"]
+
+class ListCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name"]
+
+class ListReportSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field = "name",
+        read_only = True
+    )
+
+    assigned_engineer = serializers.SlugRelatedField(
+        slug_field = "username",
+        read_only = True
+    )
+
+    class Meta:
+        model = Report
+        fields = ["id", "title", "category", "priority", "status", "assigned_engineer", "creation_date", "sla_deadline"]
