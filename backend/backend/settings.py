@@ -47,7 +47,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'helpdeskapp',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
+    'django_filters',
+    "debug_toolbar"
 ]
 
 AUTH_USER_MODEL = "helpdeskapp.User"
@@ -55,6 +57,7 @@ AUTH_USER_MODEL = "helpdeskapp.User"
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -161,3 +164,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10)
 }
+
+INTERNAL_IPS = [
+    "127.0.0.1"
+]

@@ -1,10 +1,12 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, filters
 from rest_framework.pagination import PageNumberPagination
 from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer
 from .models import Report, Priorities, Category
 from django.utils import timezone
 from datetime import timedelta
+from django_filters import rest_framework as django_filters
+from .filters import ReportFilter
 
 # Create your views here.
 class RegisterView(generics.CreateAPIView):
@@ -22,6 +24,10 @@ class ListCreateReportView(generics.ListCreateAPIView):
     serializer_class = CreateReportSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = PageNumberPagination
+    filter_backends = [django_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = ReportFilter
+    search_fields = ["title"]
+    ordering_fields = ["id", "title", "category__name", "priority", "status", "assigned_engineer__username", "creation_date", "sla_deadline"]
 
     def get_serializer_class(self): # type: ignore
         if self.request.method == 'POST':
@@ -35,16 +41,10 @@ class ListCreateReportView(generics.ListCreateAPIView):
 
     def get_queryset(self): # type: ignore
         if self.request.user.role == "client": # type: ignore
-            return Report.objects.filter(author=self.request.user)
-        return Report.objects.all()
+            return Report.objects.select_related("category", "assigned_engineer").filter(author=self.request.user)
+        return Report.objects.select_related("category", "assigned_engineer").all()
 
 class ListCategoryView(generics.ListAPIView):
     serializer_class = ListCategorySerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = Category.objects.filter(is_active=True)
-
-class ListReportView(generics.ListAPIView):
-    serializer_class = ListReportSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    
