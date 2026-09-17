@@ -1,0 +1,28 @@
+<h1>Lista zgłoszeń</h1>
+@if (reportListData()) {
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Tytuł</th>
+            <th>Kategoria</th>
+            <th>Priorytet</th>
+            <th>Status</th>
+            <th>Przypisany inżynier</th>
+            <th>Data utworzenia</th>
+            <th>SLA</th>
+        </tr>
+        @for (report of reportListData()!.results; track report.id) {
+            <tr>
+                <td>{{ report.id }}</td>
+                <td>{{ report.title }}</td>
+                <td>{{ report.category }}</td>
+                <td>{{ report.priority }}</td>
+                <td>{{ report.status }}</td>
+                <td>{{ report.assigned_engineer ?? "Brak" }}</td>
+                <td>{{ report.creation_date | date: "short"}}</td>
+                <td>{{ report.sla_deadline | date: "short" }}</td>
+            </tr>
+        }
+    </table>
+}
+<button (click)="newReport()" >Dodaj nowe zgłoszenie</button>

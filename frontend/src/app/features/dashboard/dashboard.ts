@@ -29,4 +29,8 @@ export class Dashboard {
     newReport() {
         this.router.navigate(["reports/new"])
     }
+
+    listReport() {
+        this.router.navigate(["reports/new"])
+    }
 }

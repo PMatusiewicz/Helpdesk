@@ -21,7 +21,6 @@ class UserView(generics.RetrieveAPIView):
         return self.request.user
 
 class ListCreateReportView(generics.ListCreateAPIView):
-    serializer_class = CreateReportSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = PageNumberPagination
     filter_backends = [django_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
