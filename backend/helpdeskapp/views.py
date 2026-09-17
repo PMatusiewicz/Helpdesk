@@ -40,8 +40,8 @@ class ListCreateReportView(generics.ListCreateAPIView):
 
     def get_queryset(self): # type: ignore
         if self.request.user.role == "client": # type: ignore
-            return Report.objects.select_related("category", "assigned_engineer").filter(author=self.request.user)
-        return Report.objects.select_related("category", "assigned_engineer").all()
+            return Report.objects.select_related("category", "assigned_engineer").filter(author=self.request.user).order_by("id")
+        return Report.objects.select_related("category", "assigned_engineer").all().order_by("id")
 
 class ListCategoryView(generics.ListAPIView):
     serializer_class = ListCategorySerializer

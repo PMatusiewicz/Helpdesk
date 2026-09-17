@@ -31,6 +31,6 @@ export class Dashboard {
     }
 
     listReport() {
-        this.router.navigate(["reports/new"])
+        this.router.navigate(["reports/list"])
     }
 }

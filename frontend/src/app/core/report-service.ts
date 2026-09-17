@@ -28,7 +28,9 @@ export class ReportService {
         return this.http.post(`${environment.apiUrl}/reports/`, {title, description, category, priority})
     }
 
-    getReports() {
-        return this.http.get<PaginatedResponse<ReportListItem>>(`${environment.apiUrl}/reports/`)
+    getReports(page: number) {
+        return this.http.get<PaginatedResponse<ReportListItem>>(`${environment.apiUrl}/reports/`, {
+            params: {page: page.toString()}
+        })
     }
 }

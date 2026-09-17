@@ -25,4 +25,7 @@
         }
     </table>
 }
+<p>Aktualna strona: {{ currentPage() }}</p>
+<button (click)="previousPage()" [disabled]="currentPage() == 1">Poprzednia strona</button>
+<button (click)="nextPage()" [disabled]="!reportListData()?.next">Następna strona</button>
 <button (click)="newReport()" >Dodaj nowe zgłoszenie</button>

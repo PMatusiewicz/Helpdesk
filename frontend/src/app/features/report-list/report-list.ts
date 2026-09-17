@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { PaginatedResponse, ReportListItem, ReportService } from '../../core/report-service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -12,13 +12,42 @@ import { DatePipe } from '@angular/common';
 export class ReportList {
     private report = inject(ReportService)
     private router = inject(Router)
+    private route = inject(ActivatedRoute)
 
     reportListData = signal<PaginatedResponse<ReportListItem> | null>(null)
+    currentPage = signal(1)
 
     constructor() {
-        this.report.getReports().subscribe(response => {
+        const pageParam = this.route.snapshot.queryParamMap.get("page")
+        this.currentPage.set(pageParam ? Number(pageParam) : 1)
+        this.loadReports()
+    }
+
+    loadReports() {
+        this.report.getReports(this.currentPage()).subscribe(response => {
             this.reportListData.set(response)
         })
+    }
+
+    nextPage() {
+        this.currentPage.update((value) => value + 1)
+        this.updateUrlAndLoad()
+    }
+
+    previousPage() {
+        if (this.currentPage() > 1) {
+            this.currentPage.update((value) => value - 1)
+            this.updateUrlAndLoad()
+        }
+    }
+
+    updateUrlAndLoad() {
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {page: this.currentPage()},
+            queryParamsHandling: "merge"
+        })
+        this.loadReports()
     }
 
     newReport() {
