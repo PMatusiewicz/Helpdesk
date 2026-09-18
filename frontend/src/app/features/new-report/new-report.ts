@@ -35,8 +35,8 @@ export class NewReport {
         this.report.createReport(this.reportForm.value.title ?? "", this.reportForm.value.description ?? "", Number(this.reportForm.value.category), this.reportForm.value.priority ?? ""
         ).subscribe({
             next: () => {
-                // TODO change to redirect o details of report, dashboard for now while details component isnt created
-                this.router.navigate(["/dashboard"])
+                // TODO change to redirect to details of report, list of reports for now while details component isnt created
+                this.router.navigate(["/reports/list"])
             },
             error: (err) => {
                 this.errorMessage.set("Złe dane formularza")

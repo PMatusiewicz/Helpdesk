@@ -113,4 +113,18 @@ export class ReportList {
     newReport() {
         this.router.navigate(["reports/new"])
     }
+
+    getSlaColor(report: ReportListItem) {
+        const timeLeft = new Date(report.sla_deadline).getTime() - Date.now()
+        const slaTime = new Date(report.sla_deadline).getTime() - new Date(report.creation_date).getTime()
+
+        if (timeLeft < 0) {
+            return "red"
+        }
+
+        if ((timeLeft / slaTime) < 0.25) {
+            return "yellow"
+        }
+        return "green"
+    }
 }

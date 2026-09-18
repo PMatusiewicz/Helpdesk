@@ -20,7 +20,7 @@
                 <td>{{ report.status }}</td>
                 <td>{{ report.assigned_engineer ?? "Brak" }}</td>
                 <td>{{ report.creation_date | date: "short"}}</td>
-                <td>{{ report.sla_deadline | date: "short" }}</td>
+                <td [style.color]="getSlaColor(report)">{{ report.sla_deadline | date: "short" }}</td>
             </tr>
         }
     </table>
