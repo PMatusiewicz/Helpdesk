@@ -25,6 +25,46 @@
         }
     </table>
 }
+<h2>Filtry:</h2>
+<form [formGroup]="filterForm">
+    <label for="status">Status</label>
+    <select id="status" formControlName="status">
+        <option value="" selected>Brak</option>
+        <option value="NEW">Nowe</option>
+        <option value="IN_PROGRESS">W trakcie</option>
+        <option value="WAITING_FOR_CLIENT">Oczekuje na klienta</option>
+        <option value="RESOLVED">Rozwiązane</option>
+        <option value="CLOSED">Zamknięte</option>
+    </select>
+    <label for="priority">Priorytet</label>
+    <select id="priority" formControlName="priority">
+        <option value="" selected>Brak</option>
+        <option value="CRITICAL">Krytyczny</option>
+        <option value="HIGH">Wysoki</option>
+        <option value="MEDIUM">Średni</option>
+        <option value="LOW">Niski</option>
+    </select>
+    <label for="category">Kategoria</label>
+    <select id="category" formControlName="category">
+        <option value="" selected>Brak</option>
+        @for (category of categories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+        }
+    </select>
+    <label for="assigned_engineer">Przypisany inżynier</label>
+    <select id="assigned_engineer" formControlName="assigned_engineer">
+        <option value="" selected>Brak</option>
+        @for (engineer of engineers(); track engineer.id) {
+            <option [value]="engineer.id">{{ engineer.username }}</option>
+        }
+    </select>
+    <input type="checkbox" id="only_my" formControlName="only_my">
+    <label for="only_my">Tylko moje</label>
+    <input type="checkbox" id="by_sla" formControlName="by_sla">
+    <label for="by_sla">Po SLA</label>
+    <label for="search">Wyszukiwane</label>
+    <input type="text" id="search" formControlName="search">
+</form>
 <p>Aktualna strona: {{ currentPage() }}</p>
 <button (click)="previousPage()" [disabled]="currentPage() == 1">Poprzednia strona</button>
 <button (click)="nextPage()" [disabled]="!reportListData()?.next">Następna strona</button>

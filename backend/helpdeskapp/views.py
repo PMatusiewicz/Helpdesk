@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import generics, permissions, filters
 from rest_framework.pagination import PageNumberPagination
-from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer
-from .models import Report, Priorities, Category
+from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer
+from .models import Report, Priorities, Category, User
 from django.utils import timezone
 from datetime import timedelta
 from django_filters import rest_framework as django_filters
@@ -46,4 +46,9 @@ class ListCreateReportView(generics.ListCreateAPIView):
 class ListCategoryView(generics.ListAPIView):
     serializer_class = ListCategorySerializer
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Category.objects.filter(is_active=True)
+    queryset = Category.objects.filter(is_active=True).order_by("name")
+
+class ListEngineerView(generics.ListAPIView):
+    serializer_class = ListEngineerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.filter(role="engineer").order_by("username")

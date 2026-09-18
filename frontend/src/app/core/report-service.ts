@@ -20,6 +20,16 @@ export interface ReportListItem {
     sla_deadline: string
 }
 
+export interface ReportFilters {
+    status?: string,
+    priority?: string,
+    category?: string,
+    assigned_engineer?: string,
+    only_my?: boolean,
+    by_sla?: boolean,
+    search?: string
+}
+
 @Service()
 export class ReportService {
     private http = inject(HttpClient)
@@ -28,9 +38,29 @@ export class ReportService {
         return this.http.post(`${environment.apiUrl}/reports/`, {title, description, category, priority})
     }
 
-    getReports(page: number) {
+    getReports(page: number, filters: ReportFilters) {
+        const params: any = { page: page.toString() }
+        if (filters.status) {
+            params.status = filters.status
+        }
+        if (filters.priority) {
+            params.priority = filters.priority
+        }
+        if (filters.category) {
+            params.category = filters.category
+        }
+        if (filters.only_my) {
+            params.only_my = filters.only_my.toString()
+        }
+        if (filters.by_sla) {
+            params.by_sla = filters.by_sla.toString()
+        }
+        if (filters.search) {
+            params.search = filters.search
+        }
+
         return this.http.get<PaginatedResponse<ReportListItem>>(`${environment.apiUrl}/reports/`, {
-            params: {page: page.toString()}
+            params: params
         })
     }
 }

@@ -50,3 +50,8 @@ class ListReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = ["id", "title", "category", "priority", "status", "assigned_engineer", "creation_date", "sla_deadline"]
+
+class ListEngineerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username"]
