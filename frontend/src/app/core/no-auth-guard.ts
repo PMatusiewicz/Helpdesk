@@ -8,7 +8,7 @@ export const noAuthGuard: CanActivateFn = (route, state) => {
 
     if (auth.getAccessToken()) {
         router.navigate(["/dashboard"])
-        return true
+        return false
     }
-    return false;
+    return true;
 };
