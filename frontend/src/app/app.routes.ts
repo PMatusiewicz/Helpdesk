@@ -5,11 +5,12 @@ import { Dashboard } from './features/dashboard/dashboard';
 import { authGuard } from './core/auth-guard';
 import { NewReport } from './features/new-report/new-report';
 import { ReportList } from './features/report-list/report-list';
+import { noAuthGuard } from './core/no-auth-guard';
 
 export const routes: Routes = [
     { path: "", redirectTo: "/login", pathMatch: "full" },
-    { path: "login", component: Login },
-    { path: "register", component: Register },
+    { path: "login", component: Login, canActivate: [noAuthGuard] },
+    { path: "register", component: Register, canActivate: [noAuthGuard] },
     { path: "dashboard", component: Dashboard, canActivate: [authGuard] },
     { path: "reports/new", component: NewReport, canActivate: [authGuard] },
     { path: "reports/list", component: ReportList, canActivate: [authGuard] },

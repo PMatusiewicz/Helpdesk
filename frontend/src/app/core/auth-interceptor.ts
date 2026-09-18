@@ -27,10 +27,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                             auth.saveToken(response.access, refreshToken)
                             return next(req.clone({setHeaders: { Authorization: `Bearer ${response.access}`}}))
                         }),
-                        catchError((refreshToken) => {
+                        catchError((refreshError) => {
                             auth.logout()
                             router.navigate(["/login"])
-                            return throwError(() => refreshToken)
+                            return throwError(() => refreshError)
                         })
                     )
                 }
