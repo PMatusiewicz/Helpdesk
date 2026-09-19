@@ -2,14 +2,14 @@
 @if (reportListData()) {
     <table>
         <tr>
-            <th>ID</th>
-            <th>Tytuł</th>
-            <th>Kategoria</th>
-            <th>Priorytet</th>
-            <th>Status</th>
-            <th>Przypisany inżynier</th>
-            <th>Data utworzenia</th>
-            <th>SLA</th>
+            <th (click)="sort('id')">ID</th>
+            <th (click)="sort('title')">Tytuł</th>
+            <th (click)="sort('category__name')">Kategoria</th>
+            <th (click)="sort('priority')">Priorytet</th>
+            <th (click)="sort('status')">Status</th>
+            <th (click)="sort('assigned_engineer__username')">Przypisany inżynier</th>
+            <th (click)="sort('creation_date')">Data utworzenia</th>
+            <th (click)="sort('sla_deadline')">SLA</th>
         </tr>
         @for (report of reportListData()!.results; track report.id) {
             <tr>

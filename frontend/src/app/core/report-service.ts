@@ -38,7 +38,7 @@ export class ReportService {
         return this.http.post(`${environment.apiUrl}/reports/`, {title, description, category, priority})
     }
 
-    getReports(page: number, filters: ReportFilters) {
+    getReports(page: number, filters: ReportFilters, ordering: string) {
         const params: any = { page: page.toString() }
         if (filters.status) {
             params.status = filters.status
@@ -49,6 +49,9 @@ export class ReportService {
         if (filters.category) {
             params.category = filters.category
         }
+        if (filters.assigned_engineer) {
+            params.assigned_engineer = filters.assigned_engineer
+        }
         if (filters.only_my) {
             params.only_my = filters.only_my.toString()
         }
@@ -57,6 +60,10 @@ export class ReportService {
         }
         if (filters.search) {
             params.search = filters.search
+        }
+
+        if (ordering) {
+            params.ordering = ordering
         }
 
         return this.http.get<PaginatedResponse<ReportListItem>>(`${environment.apiUrl}/reports/`, {

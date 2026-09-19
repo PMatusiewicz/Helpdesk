@@ -23,6 +23,7 @@ export class ReportList {
     currentPage = signal(1)
     categories = signal(<CategoryResponse[]>([]))
     engineers = signal(<EngineerResponse[]>([]))
+    sortField = signal("")
 
     filterForm = new FormGroup({
         status: new FormControl(""),
@@ -37,6 +38,8 @@ export class ReportList {
     constructor() {
         const params = this.route.snapshot.queryParamMap
         const pageParam = params.get("page")
+        const sortParam= params.get("ordering")
+
         this.currentPage.set(pageParam ? Number(pageParam) : 1)
         this.filterForm.patchValue({
             status: params.get("status") ?? "",
@@ -47,6 +50,7 @@ export class ReportList {
             by_sla: params.get("by_sla") == "true",
             search: params.get("search") ?? ""
         })
+        this.sortField.set(sortParam ?? "")
 
         this.loadReports()
         
@@ -75,7 +79,7 @@ export class ReportList {
             search: this.filterForm.value.search || undefined,
         }
 
-        this.report.getReports(this.currentPage(), filters).subscribe(response => {
+        this.report.getReports(this.currentPage(), filters, this.sortField()).subscribe(response => {
             this.reportListData.set(response)
         })
     }
@@ -97,6 +101,7 @@ export class ReportList {
             relativeTo: this.route,
             queryParams: {
                 page: this.currentPage(),
+                ordering: this.sortField(),
                 status: this.filterForm.value.status || null,
                 priority: this.filterForm.value.priority || null,
                 category: this.filterForm.value.category || null,
@@ -126,5 +131,16 @@ export class ReportList {
             return "yellow"
         }
         return "green"
+    }
+
+    sort(field: string) {
+        if (this.sortField() == field) {
+            this.sortField.set("-" + field)
+        }
+        else {
+            this.sortField.set(field)
+        }
+        this.currentPage.set(1)
+        this.updateUrlAndLoad()
     }
 }
