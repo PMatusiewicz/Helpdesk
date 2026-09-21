@@ -114,3 +114,36 @@ class ChangeStatusView(generics.UpdateAPIView):
 
         response_serializer = DetailsReportSerializer(report)
         return Response(response_serializer.data)
+
+class AssignToMeView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Report.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        report = self.get_object()
+
+        if request.user.role != "engineer":
+            return Response(
+                {"detail": "Tylko inżynier może zostać przypisany do zgłoszenia"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if report.status in ["RESOLVED", "CLOSED"]:
+            return Response(
+                {"detail": "Nie można przypisać inżyniera do zgłoszeń zamkniętych lub rozwiązanych"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if report.assigned_engineer is not None:
+            return Response(
+                {"detail": "Te zgłoszenie ma już przypisanego inżyniera"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        report.assigned_engineer = request.user
+        if report.status == "NEW":
+            report.status = "IN_PROGRESS"
+        report.save()
+
+        response_serializer = DetailsReportSerializer(report)
+        return Response(response_serializer.data)
