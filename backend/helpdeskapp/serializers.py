@@ -55,3 +55,25 @@ class ListEngineerSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username"]
+
+class DetailsReportSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field = "name",
+        read_only = True
+    )
+
+    assigned_engineer = serializers.SlugRelatedField(
+        slug_field = "username",
+        read_only = True
+    )
+
+    author = serializers.SlugRelatedField(
+        slug_field = "username",
+        read_only = True
+    )
+    class Meta:
+        model = Report
+        fields = ["id", "title", "status", "priority", "sla_deadline", "category", "author", "assigned_engineer", "description"]
+
+class ChangeStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=Report.Status.choices)

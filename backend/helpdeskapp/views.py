@@ -1,7 +1,8 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, filters
+from rest_framework import generics, permissions, filters, status
 from rest_framework.pagination import PageNumberPagination
-from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer
+from rest_framework.response import Response
+from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer, DetailsReportSerializer, ChangeStatusSerializer
 from .models import Report, Priorities, Category, User
 from django.utils import timezone
 from datetime import timedelta
@@ -52,3 +53,37 @@ class ListEngineerView(generics.ListAPIView):
     serializer_class = ListEngineerSerializer
     permission_classes = [permissions.IsAuthenticated]
     queryset = User.objects.filter(role="engineer").order_by("username")
+
+class DetailsReportView(generics.RetrieveAPIView):
+    serializer_class = DetailsReportSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self): #type: ignore
+        if self.request.user.role == "client": #type: ignore
+            return Report.objects.filter(author=self.request.user).select_related("category", "assigned_engineer", "author")
+        return Report.objects.all().select_related("category", "assigned_engineer", "author")
+
+class ChangeStatusView(generics.UpdateAPIView):
+    serializer_class = ChangeStatusSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Report.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        report = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_status = serializer.validated_data["status"]
+        current_status = report.status
+        allowed_next_statuses = Report.ALLOWED_TRANSITIONS.get(current_status, [])
+
+        if new_status not in allowed_next_statuses:
+            return Response(
+                {"status": f"Nie można zmienić statusu z '{current_status}' na '{new_status}'."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        report.status = new_status
+        report.save()
+
+        response_serializer = DetailsReportSerializer(report)
+        return Response(response_serializer.data)

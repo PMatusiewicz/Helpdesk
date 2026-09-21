@@ -44,6 +44,13 @@ class Report(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     sla_deadline = models.DateTimeField()
 
+    ALLOWED_TRANSITIONS = {
+        "NEW": ["IN_PROGRESS"],
+        "IN_PROGRESS": ["WAITING_FOR_CLIENT", "RESOLVED"],
+        "WAITING_FOR_CLIENT": ["IN_PROGRESS", "CLOSED"],
+        "RESOLVED": ["CLOSED", "IN_PROGRESS"]
+    }
+
     def __str__(self):
         return f"{self.pk}. {self.title}"
 
