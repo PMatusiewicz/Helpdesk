@@ -76,11 +76,38 @@ class ChangeStatusView(generics.UpdateAPIView):
         current_status = report.status
         allowed_next_statuses = Report.ALLOWED_TRANSITIONS.get(current_status, [])
 
+        BLOCKED_TRANSITIONS = {
+            ("NEW", "IN_PROGRESS"),
+            ("WAITING_FOR_CLIENT", "IN_PROGRESS")
+        }
+        CLIENT_ONLY_TRANSITIONS = {
+            ("RESOLVED", "CLOSED"),
+            ("RESOLVED", "IN_PROGRESS")
+        }
+
         if new_status not in allowed_next_statuses:
             return Response(
                 {"status": f"Nie można zmienić statusu z '{current_status}' na '{new_status}'."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        if (current_status, new_status) in BLOCKED_TRANSITIONS:
+            return Response(
+                {"status": f"Tego przejścia nie można ustawić ręcznie."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if request.user.role == "client":
+            if not (current_status, new_status) in CLIENT_ONLY_TRANSITIONS:
+                return Response(
+                    {"status": "Te przejście jest niedostępne dla klienta"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            if report.author != request.user:
+                return Response(
+                    {"status": "Klient nie może zmieniać statusów nie swoich zgłoszeń"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
 
         report.status = new_status
         report.save()
