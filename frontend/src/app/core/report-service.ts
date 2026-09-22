@@ -30,6 +30,18 @@ export interface ReportFilters {
     search?: string
 }
 
+export interface ReportDetails {
+    id: number,
+    title: string,
+    status: string,
+    priority: string,
+    sla_deadline: string
+    category: string,
+    author: string,
+    assigned_engineer: string | null,
+    description: string,
+}
+
 @Service()
 export class ReportService {
     private http = inject(HttpClient)
@@ -69,5 +81,25 @@ export class ReportService {
         return this.http.get<PaginatedResponse<ReportListItem>>(`${environment.apiUrl}/reports/`, {
             params: params
         })
+    }
+
+    getReportDetails(id: string | number) {
+        return this.http.get<ReportDetails>(`${environment.apiUrl}/reports/${id}/`)
+    }
+
+    getAvailableStatuses(id: string | number) {
+        return this.http.get<{allowed_transitions: string[]}>(`${environment.apiUrl}/reports/${id}/available-statuses/`)
+    }
+
+    changeStatus(id: string | number, status: string) {
+        return this.http.patch(`${environment.apiUrl}/reports/${id}/status/`, {status})
+    }
+
+    assignToMe(id: string | number) {
+        return this.http.post(`${environment.apiUrl}/reports/${id}/assign-to-me/`, null)
+    }
+
+    assignEngineer(id: string | number, engineer_id: string | number) {
+        return this.http.post(`${environment.apiUrl}/reports/${id}/assign-engineer/`, {engineer_id})
     }
 }

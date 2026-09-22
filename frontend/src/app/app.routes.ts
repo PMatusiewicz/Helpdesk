@@ -6,6 +6,7 @@ import { authGuard } from './core/auth-guard';
 import { NewReport } from './features/new-report/new-report';
 import { ReportList } from './features/report-list/report-list';
 import { noAuthGuard } from './core/no-auth-guard';
+import { ReportDetails } from './features/report-details/report-details';
 
 export const routes: Routes = [
     { path: "", redirectTo: "/login", pathMatch: "full" },
@@ -14,4 +15,5 @@ export const routes: Routes = [
     { path: "dashboard", component: Dashboard, canActivate: [authGuard] },
     { path: "reports/new", component: NewReport, canActivate: [authGuard] },
     { path: "reports/list", component: ReportList, canActivate: [authGuard] },
+    { path: "reports/:id", component: ReportDetails, canActivate: [authGuard] }
 ];
