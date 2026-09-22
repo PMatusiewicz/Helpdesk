@@ -178,3 +178,25 @@ class AssignEngineerByAdminView(generics.GenericAPIView):
 
         response_serializer = DetailsReportSerializer(report)
         return Response(response_serializer.data)
+
+class ListAvailableStatusView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Report.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        report = self.get_object()
+        current_status = report.status
+        allowed_next_statuses = Report.ALLOWED_TRANSITIONS.get(current_status, [])
+
+        BLOCKED_TRANSITIONS = {
+            ("NEW", "IN_PROGRESS"),
+            ("WAITING_FOR_CLIENT", "IN_PROGRESS")
+        }
+
+        if request.user.role == "client":
+            return Response({})
+
+        allowed_next_statuses = list(filter(lambda next_status: (current_status, next_status) not in BLOCKED_TRANSITIONS, allowed_next_statuses))
+
+        return Response({"allowed_transitions": allowed_next_statuses})
+
