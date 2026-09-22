@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics, permissions, filters, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer, DetailsReportSerializer, ChangeStatusSerializer
+from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer, DetailsReportSerializer, ChangeStatusSerializer, AssignEngineerByAdminSerializer
 from .models import Report, Priorities, Category, User
 from django.utils import timezone
 from datetime import timedelta
@@ -141,6 +141,37 @@ class AssignToMeView(generics.GenericAPIView):
             )
 
         report.assigned_engineer = request.user
+        if report.status == "NEW":
+            report.status = "IN_PROGRESS"
+        report.save()
+
+        response_serializer = DetailsReportSerializer(report)
+        return Response(response_serializer.data)
+
+class AssignEngineerByAdminView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = AssignEngineerByAdminSerializer
+    queryset = Report.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        report = self.get_object()
+
+        if request.user.role != "admin":
+            return Response(
+                {"detail": "Tylko admin może przypisywać inżynierów do zgłoszenia"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if report.status in ["RESOLVED", "CLOSED"]:
+            return Response(
+                {"detail": "Nie można przypisać inżyniera do zgłoszeń zamkniętych lub rozwiązanych"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        engineer = serializer.validated_data["engineer"]
+        report.assigned_engineer = engineer
         if report.status == "NEW":
             report.status = "IN_PROGRESS"
         report.save()
