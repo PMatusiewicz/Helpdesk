@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import User, Report, Category
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
@@ -14,6 +16,10 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs["password"] != attrs["confirm_password"]:
             raise serializers.ValidationError({"confirm_password": "Hasła się nie zgadzają"})
+        try:
+            validate_password(attrs["password"])
+        except DjangoValidationError as error:
+            raise serializers.ValidationError({"password": error.messages})
         return attrs
 
     def create(self, validated_data):

@@ -31,7 +31,7 @@ export class Register {
                 for (const field in err.error) {
                     const control = this.registerForm.get(field)
                     if (control) {
-                        control.setErrors({ backend: err.error[field][0]})
+                        control.setErrors({ backend: err.error[field] })
                     }
                 }
                 this.cdr.markForCheck()
