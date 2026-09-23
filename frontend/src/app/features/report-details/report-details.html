@@ -1,1 +1,44 @@
-<p>report-details works!</p>
+@if (reportData(); as report) {
+    <h1>{{ report.title }}</h1>
+    <p>Status: {{ report.status }}</p>
+    <p>Priorytet: {{ report.priority }}</p>
+    <!-- sla countdown -->
+    <p>Kategoria: {{ report.category }}</p>
+    <p>Autor: {{ report.author }}</p>
+    <p>Przypisany inżynier: {{ report.assigned_engineer ?? "Brak" }}</p>
+
+    @if (currentUser()?.role != "client" && allowedStatuses().length > 0) {
+        <form [formGroup]="statusForm" (ngSubmit)="changeStatus()">
+            <label for="status">Zmień status</label>
+            <select id="status" formControlName="status">
+                <option value="" disabled selected>Wybierz status</option>
+                @for (status of allowedStatuses(); track status) {
+                    <option [value]="status">{{ status }}</option>
+                }
+            </select>
+            <button type="submit">Zmień status</button>
+        </form>
+    }
+
+    @if (currentUser()?.role == "engineer" && !report.assigned_engineer) {
+        <button (click)="assignToMe()">Przypisz do mnie</button>
+    }
+
+    @if (currentUser()?.role == "admin") {
+        <form [formGroup]="engineerForm" (ngSubmit)="assignEngineer()">
+            <label for="engineer_id">Przypisz inżyniera</label>
+            <select id="engineer_id" formControlName="engineer_id">
+                <option value="" disabled selected>Wybierz inżyniera</option>
+                @for (engineer of engineers(); track engineer.id) {
+                    <option [value]="engineer.id">{{ engineer.username }}</option>
+                }
+            </select>
+            <button type="submit">Przypisz</button>
+        </form>
+    }
+
+    <p>Opis: {{ report.description }}</p>
+
+    <button (click)="dashboard()">Powrót na stronę główną</button>
+    <button (click)="reportList()">Powrót na listę zgłoszeń</button>
+}

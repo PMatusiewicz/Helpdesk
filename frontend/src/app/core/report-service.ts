@@ -30,12 +30,12 @@ export interface ReportFilters {
     search?: string
 }
 
-export interface ReportDetails {
+export interface ReportDetailsInterface {
     id: number,
     title: string,
     status: string,
     priority: string,
-    sla_deadline: string
+    sla_deadline: string,
     category: string,
     author: string,
     assigned_engineer: string | null,
@@ -84,7 +84,7 @@ export class ReportService {
     }
 
     getReportDetails(id: string | number) {
-        return this.http.get<ReportDetails>(`${environment.apiUrl}/reports/${id}/`)
+        return this.http.get<ReportDetailsInterface>(`${environment.apiUrl}/reports/${id}/`)
     }
 
     getAvailableStatuses(id: string | number) {

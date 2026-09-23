@@ -194,7 +194,7 @@ class ListAvailableStatusView(generics.GenericAPIView):
         }
 
         if request.user.role == "client":
-            return Response({})
+            return Response({"allowed_transitions": []})
 
         allowed_next_statuses = list(filter(lambda next_status: (current_status, next_status) not in BLOCKED_TRANSITIONS, allowed_next_statuses))
 

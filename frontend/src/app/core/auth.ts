@@ -7,7 +7,7 @@ interface TokenResponse {
     refresh: string
 }
 
-interface UserResponse {
+export interface UserResponse {
     username: string
     email: string
     role: string
