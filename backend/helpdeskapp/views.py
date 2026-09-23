@@ -8,6 +8,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django_filters import rest_framework as django_filters
 from .filters import ReportFilter
+from django.db.models import Count
 
 # Create your views here.
 class RegisterView(generics.CreateAPIView):
@@ -225,3 +226,40 @@ class ChangePriorityView(generics.UpdateAPIView):
 
         response_serializer = DetailsReportSerializer(report)
         return Response(response_serializer.data)
+
+class DashboardView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if request.user.role == "client":
+            counts = {
+                "new": Report.objects.filter(author=request.user, status="NEW").count(),
+                "in_progress": Report.objects.filter(author=request.user, status="IN_PROGRESS").count(),
+                "waiting_for_client": Report.objects.filter(author=request.user, status="WAITING_FOR_CLIENT").count(),
+                "resolved": Report.objects.filter(author=request.user, status="RESOLVED").count(),
+                "closed": Report.objects.filter(author=request.user, status="CLOSED").count(),
+            }
+            recent_reports = Report.objects.filter(author=request.user).order_by("-creation_date")[:5]
+
+            return Response({
+                "status_counts": counts,
+                "recent_reports": ListReportSerializer(recent_reports, many=True).data
+            })
+
+        new_unassigned = Report.objects.filter(status="NEW", assigned_engineer__isnull=True).count()
+        my_in_progress = Report.objects.filter(status="IN_PROGRESS", assigned_engineer=request.user).count()
+        after_sla_time = Report.objects.filter(status__in=["NEW", "IN_PROGRESS"], sla_deadline__lt=timezone.now()).count()
+        assigned_to_me = Report.objects.filter(assigned_engineer=request.user).order_by("-creation_date")
+
+        response_data = {
+            "new_unassigned": new_unassigned,
+            "my_in_progress": my_in_progress,
+            "after_sla_time": after_sla_time,
+            "assigned_to_me": ListReportSerializer(assigned_to_me, many=True).data
+        }
+
+        if request.user.role == "admin":
+            category_counts = Report.objects.values("category__name").annotate(count=Count("id"))
+            response_data["category_counts"] = list(category_counts)
+
+        return Response(response_data)
