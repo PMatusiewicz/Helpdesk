@@ -37,8 +37,12 @@
         </form>
     }
 
-    <p>Opis: {{ report.description }}</p>
+    @if (currentUser()?.role == "client" && report.status == "RESOLVED" && report.author == currentUser()?.username) {
+        <button (click)="confirmSolution()">Potwierdź rozwiązanie</button>
+        <button (click)="rejectSolution()">Odrzuć rozwiązanie</button>
+    }
 
+    <p>Opis: {{ report.description }}</p>
+}
     <button (click)="dashboard()">Powrót na stronę główną</button>
     <button (click)="reportList()">Powrót na listę zgłoszeń</button>
-}

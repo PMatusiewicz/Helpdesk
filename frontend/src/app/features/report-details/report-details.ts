@@ -97,4 +97,16 @@ export class ReportDetails {
     reportList() {
         this.router.navigate(["/reports/list"])
     }
+
+    confirmSolution() {
+        this.report.changeStatus(this.reportId, "CLOSED").subscribe(() => {
+            this.refreshAll()
+        })
+    }
+
+    rejectSolution() {
+        this.report.changeStatus(this.reportId, "IN_PROGRESS").subscribe(() => {
+            this.refreshAll()
+        })
+    }
 }

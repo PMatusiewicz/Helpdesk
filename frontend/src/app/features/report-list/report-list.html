@@ -1,7 +1,7 @@
 <h1>Lista zgłoszeń</h1>
 @if (reportListData()) {
     <table>
-        <tr>
+        <tr style="cursor: pointer;">
             <th (click)="sort('id')">ID</th>
             <th (click)="sort('title')">Tytuł</th>
             <th (click)="sort('category__name')">Kategoria</th>
