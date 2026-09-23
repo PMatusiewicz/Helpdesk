@@ -1,4 +1,50 @@
-<h1>Witaj, {{ username() }}</h1>
+@if (dashboardData(); as data) {
+    <h1>Witaj, {{ currentUser()?.username }}</h1>
+    <p>Twoja rola: {{ currentUser()?.role }}</p>
+    @if (currentUser()?.role == "client" && data.status_counts) {
+        <h2>Liczba twoich zgłoszeń</h2>
+        <ul>
+            <li>Nowe: {{ data.status_counts.new }}</li>
+            <li>W trakcie: {{ data.status_counts.in_progress }}</li>
+            <li>Oczekuje na twoją reakcję: {{ data.status_counts.waiting_for_client }}</li>
+            <li>Rozwiązane: {{ data.status_counts.resolved }}</li>
+            <li>Zamknięte: {{ data.status_counts.closed }}</li>
+        </ul>
+
+        <h2>5 ostatnich twoich zgłoszeń</h2>
+        <ul>
+            @for (report of data.recent_reports; track report.id) {
+                <li (click)="reportDetails(report.id)" style="cursor: pointer;">{{ report.title }} - {{ report.status }}</li>
+            }
+        </ul>
+    }
+
+    @if (currentUser()?.role != "client" && data.new_unassigned != undefined) {
+        <h2>Zgłoszenia</h2>
+        <ul>
+            <li>Nowe nieprzypisane: {{ data.new_unassigned }}</li>
+            <li>Twoje w toku: {{ data.my_in_progress }}</li>
+            <li>Po terminie SLA: {{ data.after_sla_time }}</li>
+        </ul>
+
+        @if (currentUser()?.role == "admin" && data.category_counts) {
+            <h2>Liczba zgłoszeń danej kategorii</h2>
+            <ul>
+                @for (category of data.category_counts; track category.category__name) {
+                    <li>{{ category.category__name }}: {{ category.count }}</li>
+                }
+            </ul>
+        }
+
+        <h2>Zgłoszenia przypisane do ciebie</h2>
+        <ul>
+            @for (report of data.assigned_to_me; track report.id) {
+                <li (click)="reportDetails(report.id)" style="cursor: pointer;">{{ report.title }} - {{ report.priority }}</li>
+            }
+        </ul>
+    }
+}
+
 <button (click)="logout()" >Wyloguj się</button>
 <button (click)="newReport()" >Dodaj nowe zgłoszenie</button>
 <button (click)="listReport()" >Lista zgłoszeń</button>
