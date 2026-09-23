@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ReportDetailsInterface, ReportService } from '../../core/report-service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,7 +11,7 @@ import { EngineerResponse, EngineerService } from '../../core/engineer-service';
   styleUrl: './report-details.css',
   templateUrl: './report-details.html',
 })
-export class ReportDetails {
+export class ReportDetails implements OnDestroy {
     private report = inject(ReportService)
     private router = inject(Router)
     private route = inject(ActivatedRoute)
@@ -24,6 +24,7 @@ export class ReportDetails {
     allowedStatuses = signal<string[]>([])
     engineers = signal<EngineerResponse[]>([])
     currentUser = signal<UserResponse | null>(null)
+    slaCountdown = signal("")
 
     statusForm = new FormGroup({
         status: new FormControl("")
@@ -32,6 +33,12 @@ export class ReportDetails {
     engineerForm = new FormGroup({
         engineer_id: new FormControl("")
     })
+
+    priorityForm = new FormGroup({
+        priority: new FormControl("")
+    })
+
+    private intervalId?: ReturnType<typeof setInterval>
 
     constructor() {
         this.refreshAll()
@@ -43,11 +50,20 @@ export class ReportDetails {
         this.auth.getMe().subscribe(response => {
             this.currentUser.set(response)
         })
+
+        this.intervalId = setInterval(() => this.updateSlaCountdown(), 1000)
+    }
+
+    ngOnDestroy(): void {
+        if (this.intervalId) {
+            clearInterval(this.intervalId)
+        }
     }
 
     loadReport() {
         this.report.getReportDetails(this.reportId).subscribe(response => {
             this.reportData.set(response)
+            this.updateSlaCountdown()
         })
     }
 
@@ -108,5 +124,35 @@ export class ReportDetails {
         this.report.changeStatus(this.reportId, "IN_PROGRESS").subscribe(() => {
             this.refreshAll()
         })
+    }
+
+    changePriority() {
+        const newPriority = this.priorityForm.value.priority
+        if (!newPriority) {
+            return
+        }
+
+        this.report.changePriority(this.reportId, newPriority).subscribe(() => {
+            this.refreshAll()
+        })
+    }
+
+    updateSlaCountdown() {
+        const report = this.reportData()
+        if (!report) {
+            return
+        }
+
+        const deadline = new Date(report.sla_deadline).getTime()
+        let diff = deadline - Date.now()
+        const isOverdue = diff < 0
+        diff = Math.abs(diff)
+
+        const hours = Math.floor(diff / (1000 * 60 * 60))
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+
+        const formatted = `${hours}h ${minutes}min ${seconds}s`
+        this.slaCountdown.set(isOverdue ? `Przekroczono o: ${formatted}` : `Pozostało: ${formatted}`)
     }
 }

@@ -102,4 +102,8 @@ export class ReportService {
     assignEngineer(id: string | number, engineer_id: string | number) {
         return this.http.post(`${environment.apiUrl}/reports/${id}/assign-engineer/`, {engineer_id})
     }
+
+    changePriority(id: string | number, priority: string) {
+        return this.http.patch(`${environment.apiUrl}/reports/${id}/priority/`, {priority})
+    }
 }

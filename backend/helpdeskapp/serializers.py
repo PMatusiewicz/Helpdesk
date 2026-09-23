@@ -86,3 +86,6 @@ class ChangeStatusSerializer(serializers.Serializer):
 
 class AssignEngineerByAdminSerializer(serializers.Serializer):
     engineer_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(role="engineer"), source="engineer")
+
+class ChangePrioritySerializer(serializers.Serializer):
+    priority = serializers.ChoiceField(choices=Report.Priority.choices)

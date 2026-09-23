@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics, permissions, filters, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer, DetailsReportSerializer, ChangeStatusSerializer, AssignEngineerByAdminSerializer
+from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer, DetailsReportSerializer, ChangeStatusSerializer, AssignEngineerByAdminSerializer, ChangePrioritySerializer
 from .models import Report, Priorities, Category, User
 from django.utils import timezone
 from datetime import timedelta
@@ -200,3 +200,28 @@ class ListAvailableStatusView(generics.GenericAPIView):
 
         return Response({"allowed_transitions": allowed_next_statuses})
 
+class ChangePriorityView(generics.UpdateAPIView):
+    serializer_class = ChangePrioritySerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Report.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        report = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_priority = serializer.validated_data["priority"]
+
+        if request.user.role == "client":
+            return Response({"detail": "Klient nie może zmieniać priorytetu"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        sla_time = Priorities.objects.get(priority=new_priority).sla
+        new_sla_deadline = timezone.now() + timedelta(hours=sla_time)
+
+        report.priority = new_priority
+        report.sla_deadline = new_sla_deadline
+        report.save()
+
+        response_serializer = DetailsReportSerializer(report)
+        return Response(response_serializer.data)

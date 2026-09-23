@@ -2,21 +2,34 @@
     <h1>{{ report.title }}</h1>
     <p>Status: {{ report.status }}</p>
     <p>Priorytet: {{ report.priority }}</p>
-    <!-- sla countdown -->
+    <p>{{ slaCountdown() }}</p>
     <p>Kategoria: {{ report.category }}</p>
     <p>Autor: {{ report.author }}</p>
     <p>Przypisany inżynier: {{ report.assigned_engineer ?? "Brak" }}</p>
 
-    @if (currentUser()?.role != "client" && allowedStatuses().length > 0) {
-        <form [formGroup]="statusForm" (ngSubmit)="changeStatus()">
-            <label for="status">Zmień status</label>
-            <select id="status" formControlName="status">
-                <option value="" disabled selected>Wybierz status</option>
-                @for (status of allowedStatuses(); track status) {
-                    <option [value]="status">{{ status }}</option>
-                }
+    @if (currentUser()?.role != "client") {
+        @if (allowedStatuses().length > 0) {
+            <form [formGroup]="statusForm" (ngSubmit)="changeStatus()">
+                <label for="status">Zmień status</label>
+                <select id="status" formControlName="status">
+                    <option value="" disabled selected>Wybierz status</option>
+                    @for (status of allowedStatuses(); track status) {
+                        <option [value]="status">{{ status }}</option>
+                    }
+                </select>
+                <button type="submit">Zmień status</button>
+            </form>
+        }
+        <form [formGroup]="priorityForm" (ngSubmit)="changePriority()">
+            <label for="priority">Zmień priorytet</label>
+            <select id="priority" formControlName="priority">
+                <option value="" disabled selected>Wybierz priorytet</option>
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="LOW">LOW</option>
             </select>
-            <button type="submit">Zmień status</button>
+            <button type="submit">Zmień Priorytet</button>
         </form>
     }
 
