@@ -12,7 +12,7 @@
             <th (click)="sort('sla_deadline')">SLA</th>
         </tr>
         @for (report of reportListData()!.results; track report.id) {
-            <tr>
+            <tr (click)="reportDetails(report.id)" style="cursor: pointer;">
                 <td>{{ report.id }}</td>
                 <td>{{ report.title }}</td>
                 <td>{{ report.category }}</td>

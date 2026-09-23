@@ -143,4 +143,8 @@ export class ReportList {
         this.currentPage.set(1)
         this.updateUrlAndLoad()
     }
+
+    reportDetails(id: number) {
+        this.router.navigate(["/reports", id])
+    }
 }
