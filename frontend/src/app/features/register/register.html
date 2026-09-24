@@ -1,35 +1,57 @@
-<h1>Rejestracja</h1>
-<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-    <label for="username">Nazwa użytkownika</label>
-    <input type="text" formControlName="username" id="username">
-    @if (registerForm.get("username")?.errors?.["backend"]) {
-        @for (error of registerForm.get("username")?.errors?.["backend"]; track error) {
-            <p>{{ error }}</p>
-        }
-    }
-    <label for="email">Adres email</label>
-    <input type="email" formControlName="email" id="email">
-    @if (registerForm.get("email")?.errors?.["backend"]) {
-        @for (error of registerForm.get("email")?.errors?.["backend"]; track error) {
-            <p>{{ error }}</p>
-        }
-    }
-    <label for="password">Hasło</label>
-    <input type="password" formControlName="password" id="password">
-    @if (registerForm.get("password")?.errors?.["backend"]) {
-        <ul>
-            @for (error of registerForm.get("password")?.errors?.["backend"]; track error) {
-                <li>{{ error }}</li>
-            }
-        </ul>
-    }
-    <label for="confirm_password">Potwierdź hasło</label>
-    <input type="password" formControlName="confirm_password" id="confirm_password">
-    @if (registerForm.get("confirm_password")?.errors?.["backend"]) {
-        @for (error of registerForm.get("confirm_password")?.errors?.["backend"]; track error) {
-            <p>{{ error }}</p>
-        }
-    }
-    <button type="submit">Zarejestruj się</button>
-</form>
-<a routerLink="/login">Logowanie</a>
+<div class="d-flex justify-content-center">
+    <div class="card mt-5 mb-5" style="width: 24rem;">
+        <div class="card-body">
+            <h1 class="card-title mb-4">Rejestracja</h1>
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Nazwa użytkownika</label>
+                    <input type="text" formControlName="username" id="username" class="form-control">
+                    @if (registerForm.get("username")?.errors?.["backend"]) {
+                        <ul class="text-danger small mt-1 ps-3 mb-0">
+                            @for (error of registerForm.get("username")?.errors?.["backend"]; track error) {
+                                <li>{{ error }}</li>
+                            }
+                        </ul>
+                    }
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Adres email</label>
+                    <input type="email" formControlName="email" id="email" class="form-control">
+                    @if (registerForm.get("email")?.errors?.["backend"]) {
+                        <ul class="text-danger small mt-1 ps-3 mb-0">
+                            @for (error of registerForm.get("email")?.errors?.["backend"]; track error) {
+                                <li>{{ error }}</li>
+                            }
+                        </ul>
+                    }
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Hasło</label>
+                    <input type="password" formControlName="password" id="password" class="form-control">
+                    @if (registerForm.get("password")?.errors?.["backend"]) {
+                        <ul class="text-danger small mt-1 ps-3 mb-0">
+                            @for (error of registerForm.get("password")?.errors?.["backend"]; track error) {
+                                <li>{{ error }}</li>
+                            }
+                        </ul>
+                    }
+                </div>
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">Potwierdź hasło</label>
+                    <input type="password" formControlName="confirm_password" id="confirm_password" class="form-control">
+                    @if (registerForm.get("confirm_password")?.errors?.["backend"]) {
+                        <ul class="text-danger small mt-1 ps-3 mb-0">
+                            @for (error of registerForm.get("confirm_password")?.errors?.["backend"]; track error) {
+                                <li>{{ error }}</li>
+                            }
+                        </ul>
+                    }
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Zarejestruj się</button>
+            </form>
+            <div class="mt-3 text-center">
+                <a routerLink="/login">Logowanie</a>
+            </div>
+        </div>
+    </div>
+</div>

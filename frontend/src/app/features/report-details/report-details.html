@@ -1,61 +1,86 @@
-@if (reportData(); as report) {
-    <h1>{{ report.title }}</h1>
-    <p>Status: {{ report.status }}</p>
-    <p>Priorytet: {{ report.priority }}</p>
-    <p>{{ slaCountdown() }}</p>
-    <p>Kategoria: {{ report.category }}</p>
-    <p>Autor: {{ report.author }}</p>
-    <p>Przypisany inżynier: {{ report.assigned_engineer ?? "Brak" }}</p>
+<div class="container">
+    @if (reportData(); as report) {
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h1 class="h3 mb-0">{{ report.title }}</h1>
+                    <div>
+                        <span class="badge bg-primary">{{ report.status }}</span>
+                        <span class="badge bg-secondary">{{ report.priority }}</span>
+                    </div>
+                </div>
+                <p class="text-danger fw-semibold">{{ slaCountdown() }}</p>
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Kategoria:</strong> {{ report.category }}</div>
+                    <div class="col-md-4"><strong>Autor:</strong> {{ report.author }}</div>
+                    <div class="col-md-4"><strong>Przypisany inżynier:</strong> {{ report.assigned_engineer ?? "Brak" }}</div>
+                </div>
+                <p class="mb-0">{{ report.description }}</p>
+            </div>
+        </div>
 
-    @if (currentUser()?.role != "client") {
-        @if (allowedStatuses().length > 0) {
-            <form [formGroup]="statusForm" (ngSubmit)="changeStatus()">
-                <label for="status">Zmień status</label>
-                <select id="status" formControlName="status">
-                    <option value="" disabled selected>Wybierz status</option>
-                    @for (status of allowedStatuses(); track status) {
-                        <option [value]="status">{{ status }}</option>
-                    }
-                </select>
-                <button type="submit">Zmień status</button>
-            </form>
-        }
-        <form [formGroup]="priorityForm" (ngSubmit)="changePriority()">
-            <label for="priority">Zmień priorytet</label>
-            <select id="priority" formControlName="priority">
-                <option value="" disabled selected>Wybierz priorytet</option>
-                <option value="CRITICAL">CRITICAL</option>
-                <option value="HIGH">HIGH</option>
-                <option value="MEDIUM">MEDIUM</option>
-                <option value="LOW">LOW</option>
-            </select>
-            <button type="submit">Zmień Priorytet</button>
-        </form>
-    }
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Akcje</h2>
 
-    @if (currentUser()?.role == "engineer" && !report.assigned_engineer) {
-        <button (click)="assignToMe()">Przypisz do mnie</button>
-    }
-
-    @if (currentUser()?.role == "admin") {
-        <form [formGroup]="engineerForm" (ngSubmit)="assignEngineer()">
-            <label for="engineer_id">Przypisz inżyniera</label>
-            <select id="engineer_id" formControlName="engineer_id">
-                <option value="" disabled selected>Wybierz inżyniera</option>
-                @for (engineer of engineers(); track engineer.id) {
-                    <option [value]="engineer.id">{{ engineer.username }}</option>
+                @if (currentUser()?.role != "client") {
+                    <div class="row g-3">
+                        @if (allowedStatuses().length > 0) {
+                            <div class="col-md-6">
+                                <form [formGroup]="statusForm" (ngSubmit)="changeStatus()" class="d-flex gap-2">
+                                    <select id="status" formControlName="status" class="form-select">
+                                        <option value="" disabled selected>Wybierz status</option>
+                                        @for (status of allowedStatuses(); track status) {
+                                            <option [value]="status">{{ status }}</option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="btn btn-primary text-nowrap">Zmień status</button>
+                                </form>
+                            </div>
+                        }
+                        <div class="col-md-6">
+                            <form [formGroup]="priorityForm" (ngSubmit)="changePriority()" class="d-flex gap-2">
+                                <select id="priority" formControlName="priority" class="form-select">
+                                    <option value="" disabled selected>Wybierz priorytet</option>
+                                    <option value="CRITICAL">CRITICAL</option>
+                                    <option value="HIGH">HIGH</option>
+                                    <option value="MEDIUM">MEDIUM</option>
+                                    <option value="LOW">LOW</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary text-nowrap">Zmień priorytet</button>
+                            </form>
+                        </div>
+                    </div>
                 }
-            </select>
-            <button type="submit">Przypisz</button>
-        </form>
+
+                @if (currentUser()?.role == "engineer" && !report.assigned_engineer) {
+                    <button (click)="assignToMe()" class="btn btn-success mt-3">Przypisz do mnie</button>
+                }
+
+                @if (currentUser()?.role == "admin") {
+                    <form [formGroup]="engineerForm" (ngSubmit)="assignEngineer()" class="d-flex gap-2 mt-3" style="max-width: 24rem;">
+                        <select id="engineer_id" formControlName="engineer_id" class="form-select">
+                            <option value="" disabled selected>Wybierz inżyniera</option>
+                            @for (engineer of engineers(); track engineer.id) {
+                                <option [value]="engineer.id">{{ engineer.username }}</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-primary text-nowrap">Przypisz</button>
+                    </form>
+                }
+
+                @if (currentUser()?.role == "client" && report.status == "RESOLVED" && report.author == currentUser()?.username) {
+                    <div class="d-flex gap-2 mt-3">
+                        <button (click)="confirmSolution()" class="btn btn-success">Potwierdź rozwiązanie</button>
+                        <button (click)="rejectSolution()" class="btn btn-danger">Odrzuć rozwiązanie</button>
+                    </div>
+                }
+            </div>
+        </div>
     }
 
-    @if (currentUser()?.role == "client" && report.status == "RESOLVED" && report.author == currentUser()?.username) {
-        <button (click)="confirmSolution()">Potwierdź rozwiązanie</button>
-        <button (click)="rejectSolution()">Odrzuć rozwiązanie</button>
-    }
-
-    <p>Opis: {{ report.description }}</p>
-}
-    <button (click)="dashboard()">Powrót na stronę główną</button>
-    <button (click)="reportList()">Powrót na listę zgłoszeń</button>
+    <div class="d-flex gap-2">
+        <button (click)="dashboard()" class="btn btn-outline-secondary">Powrót na stronę główną</button>
+        <button (click)="reportList()" class="btn btn-outline-secondary">Powrót na listę zgłoszeń</button>
+    </div>
+</div>

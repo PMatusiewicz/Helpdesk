@@ -1,71 +1,108 @@
-<h1>Lista zgłoszeń</h1>
-@if (reportListData()) {
-    <table>
-        <tr style="cursor: pointer;">
-            <th (click)="sort('id')">ID</th>
-            <th (click)="sort('title')">Tytuł</th>
-            <th (click)="sort('category__name')">Kategoria</th>
-            <th (click)="sort('priority')">Priorytet</th>
-            <th (click)="sort('status')">Status</th>
-            <th (click)="sort('assigned_engineer__username')">Przypisany inżynier</th>
-            <th (click)="sort('creation_date')">Data utworzenia</th>
-            <th (click)="sort('sla_deadline')">SLA</th>
-        </tr>
-        @for (report of reportListData()!.results; track report.id) {
-            <tr (click)="reportDetails(report.id)" style="cursor: pointer;">
-                <td>{{ report.id }}</td>
-                <td>{{ report.title }}</td>
-                <td>{{ report.category }}</td>
-                <td>{{ report.priority }}</td>
-                <td>{{ report.status }}</td>
-                <td>{{ report.assigned_engineer ?? "Brak" }}</td>
-                <td>{{ report.creation_date | date: "short"}}</td>
-                <td [style.color]="getSlaColor(report)">{{ report.sla_deadline | date: "short" }}</td>
-            </tr>
-        }
-    </table>
-}
-<h2>Filtry:</h2>
-<form [formGroup]="filterForm">
-    <label for="status">Status</label>
-    <select id="status" formControlName="status">
-        <option value="" selected>Brak</option>
-        <option value="NEW">Nowe</option>
-        <option value="IN_PROGRESS">W trakcie</option>
-        <option value="WAITING_FOR_CLIENT">Oczekuje na klienta</option>
-        <option value="RESOLVED">Rozwiązane</option>
-        <option value="CLOSED">Zamknięte</option>
-    </select>
-    <label for="priority">Priorytet</label>
-    <select id="priority" formControlName="priority">
-        <option value="" selected>Brak</option>
-        <option value="CRITICAL">Krytyczny</option>
-        <option value="HIGH">Wysoki</option>
-        <option value="MEDIUM">Średni</option>
-        <option value="LOW">Niski</option>
-    </select>
-    <label for="category">Kategoria</label>
-    <select id="category" formControlName="category">
-        <option value="" selected>Brak</option>
-        @for (category of categories(); track category.id) {
-            <option [value]="category.id">{{ category.name }}</option>
-        }
-    </select>
-    <label for="assigned_engineer">Przypisany inżynier</label>
-    <select id="assigned_engineer" formControlName="assigned_engineer">
-        <option value="" selected>Brak</option>
-        @for (engineer of engineers(); track engineer.id) {
-            <option [value]="engineer.id">{{ engineer.username }}</option>
-        }
-    </select>
-    <input type="checkbox" id="only_my" formControlName="only_my">
-    <label for="only_my">Tylko moje</label>
-    <input type="checkbox" id="by_sla" formControlName="by_sla">
-    <label for="by_sla">Po SLA</label>
-    <label for="search">Wyszukiwane</label>
-    <input type="text" id="search" formControlName="search">
-</form>
-<p>Aktualna strona: {{ currentPage() }}</p>
-<button (click)="previousPage()" [disabled]="currentPage() == 1">Poprzednia strona</button>
-<button (click)="nextPage()" [disabled]="!reportListData()?.next">Następna strona</button>
-<button (click)="newReport()" >Dodaj nowe zgłoszenie</button>
+<div class="container">
+    <h1 class="mb-4">Lista zgłoszeń</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5 mb-3">Filtry</h2>
+            <form [formGroup]="filterForm" class="row g-3">
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select id="status" formControlName="status" class="form-select">
+                        <option value="" selected>Brak</option>
+                        <option value="NEW">Nowe</option>
+                        <option value="IN_PROGRESS">W trakcie</option>
+                        <option value="WAITING_FOR_CLIENT">Oczekuje na klienta</option>
+                        <option value="RESOLVED">Rozwiązane</option>
+                        <option value="CLOSED">Zamknięte</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="priority" class="form-label">Priorytet</label>
+                    <select id="priority" formControlName="priority" class="form-select">
+                        <option value="" selected>Brak</option>
+                        <option value="CRITICAL">Krytyczny</option>
+                        <option value="HIGH">Wysoki</option>
+                        <option value="MEDIUM">Średni</option>
+                        <option value="LOW">Niski</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="category" class="form-label">Kategoria</label>
+                    <select id="category" formControlName="category" class="form-select">
+                        <option value="" selected>Brak</option>
+                        @for (category of categories(); track category.id) {
+                            <option [value]="category.id">{{ category.name }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="assigned_engineer" class="form-label">Przypisany inżynier</label>
+                    <select id="assigned_engineer" formControlName="assigned_engineer" class="form-select">
+                        <option value="" selected>Brak</option>
+                        @for (engineer of engineers(); track engineer.id) {
+                            <option [value]="engineer.id">{{ engineer.username }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="search" class="form-label">Wyszukiwanie</label>
+                    <input type="text" id="search" formControlName="search" class="form-control">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <div class="form-check">
+                        <input type="checkbox" id="only_my" formControlName="only_my" class="form-check-input">
+                        <label for="only_my" class="form-check-label">Tylko moje</label>
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <div class="form-check">
+                        <input type="checkbox" id="by_sla" formControlName="by_sla" class="form-check-input">
+                        <label for="by_sla" class="form-check-label">Po SLA</label>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (reportListData()) {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th (click)="sort('id')" role="button">ID</th>
+                        <th (click)="sort('title')" role="button">Tytuł</th>
+                        <th (click)="sort('category__name')" role="button">Kategoria</th>
+                        <th (click)="sort('priority')" role="button">Priorytet</th>
+                        <th (click)="sort('status')" role="button">Status</th>
+                        <th (click)="sort('assigned_engineer__username')" role="button">Przypisany inżynier</th>
+                        <th (click)="sort('creation_date')" role="button">Data utworzenia</th>
+                        <th (click)="sort('sla_deadline')" role="button">SLA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (report of reportListData()!.results; track report.id) {
+                        <tr (click)="reportDetails(report.id)" role="button">
+                            <td>{{ report.id }}</td>
+                            <td>{{ report.title }}</td>
+                            <td>{{ report.category }}</td>
+                            <td>{{ report.priority }}</td>
+                            <td>{{ report.status }}</td>
+                            <td>{{ report.assigned_engineer ?? "Brak" }}</td>
+                            <td>{{ report.creation_date | date: "short"}}</td>
+                            <td [style.color]="getSlaColor(report)" class="fw-semibold">{{ report.sla_deadline | date: "short" }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <span class="text-muted">Aktualna strona: {{ currentPage() }}</span>
+        <div>
+            <button (click)="previousPage()" [disabled]="currentPage() == 1" class="btn btn-outline-secondary me-2">Poprzednia strona</button>
+            <button (click)="nextPage()" [disabled]="!reportListData()?.next" class="btn btn-outline-secondary">Następna strona</button>
+        </div>
+        <button (click)="newReport()" class="btn btn-primary">Dodaj nowe zgłoszenie</button>
+    </div>
+</div>

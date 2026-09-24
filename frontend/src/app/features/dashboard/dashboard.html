@@ -1,50 +1,117 @@
-@if (dashboardData(); as data) {
-    <h1>Witaj, {{ currentUser()?.username }}</h1>
-    <p>Twoja rola: {{ currentUser()?.role }}</p>
-    @if (currentUser()?.role == "client" && data.status_counts) {
-        <h2>Liczba twoich zgłoszeń</h2>
-        <ul>
-            <li>Nowe: {{ data.status_counts.new }}</li>
-            <li>W trakcie: {{ data.status_counts.in_progress }}</li>
-            <li>Oczekuje na twoją reakcję: {{ data.status_counts.waiting_for_client }}</li>
-            <li>Rozwiązane: {{ data.status_counts.resolved }}</li>
-            <li>Zamknięte: {{ data.status_counts.closed }}</li>
-        </ul>
+<div class="container">
+    @if (dashboardData(); as data) {
+        <h1 class="mb-1">Witaj, {{ currentUser()?.username }}</h1>
+        <p class="text-muted mb-4">Twoja rola: {{ currentUser()?.role }}</p>
 
-        <h2>5 ostatnich twoich zgłoszeń</h2>
-        <ul>
-            @for (report of data.recent_reports; track report.id) {
-                <li (click)="reportDetails(report.id)" style="cursor: pointer;">{{ report.title }} - {{ report.status }}</li>
-            }
-        </ul>
-    }
+        @if (currentUser()?.role == "client" && data.status_counts) {
+            <h2 class="h4 mb-3">Liczba twoich zgłoszeń</h2>
+            <div class="row row-cols-5 g-3 mb-4">
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="fs-4">{{ data.status_counts.new }}</div>
+                            <div class="text-muted small">Nowe</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="fs-4">{{ data.status_counts.in_progress }}</div>
+                            <div class="text-muted small">W trakcie</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="fs-4">{{ data.status_counts.waiting_for_client }}</div>
+                            <div class="text-muted small">Oczekuje na Ciebie</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="fs-4">{{ data.status_counts.resolved }}</div>
+                            <div class="text-muted small">Rozwiązane</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="fs-4">{{ data.status_counts.closed }}</div>
+                            <div class="text-muted small">Zamknięte</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    @if (currentUser()?.role != "client" && data.new_unassigned != undefined) {
-        <h2>Zgłoszenia</h2>
-        <ul>
-            <li>Nowe nieprzypisane: {{ data.new_unassigned }}</li>
-            <li>Twoje w toku: {{ data.my_in_progress }}</li>
-            <li>Po terminie SLA: {{ data.after_sla_time }}</li>
-        </ul>
-
-        @if (currentUser()?.role == "admin" && data.category_counts) {
-            <h2>Liczba zgłoszeń danej kategorii</h2>
-            <ul>
-                @for (category of data.category_counts; track category.category__name) {
-                    <li>{{ category.category__name }}: {{ category.count }}</li>
+            <h2 class="h4 mb-3">5 ostatnich twoich zgłoszeń</h2>
+            <div class="list-group mb-4">
+                @for (report of data.recent_reports; track report.id) {
+                    <a (click)="reportDetails(report.id)" role="button" class="list-group-item list-group-item-action d-flex justify-content-between">
+                        <span>{{ report.title }}</span>
+                        <span class="text-muted">{{ report.status }}</span>
+                    </a>
                 }
-            </ul>
+            </div>
         }
 
-        <h2>Zgłoszenia przypisane do ciebie</h2>
-        <ul>
-            @for (report of data.assigned_to_me; track report.id) {
-                <li (click)="reportDetails(report.id)" style="cursor: pointer;">{{ report.title }} - {{ report.priority }}</li>
-            }
-        </ul>
-    }
-}
+        @if (currentUser()?.role != "client" && data.new_unassigned != undefined) {
+            <h2 class="h4 mb-3">Zgłoszenia</h2>
+            <div class="row row-cols-3 g-3 mb-4">
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="fs-4">{{ data.new_unassigned }}</div>
+                            <div class="text-muted small">Nowe nieprzypisane</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="fs-4">{{ data.my_in_progress }}</div>
+                            <div class="text-muted small">Twoje w toku</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center border-danger">
+                        <div class="card-body">
+                            <div class="fs-4 text-danger">{{ data.after_sla_time }}</div>
+                            <div class="text-muted small">Po terminie SLA</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<button (click)="logout()" >Wyloguj się</button>
-<button (click)="newReport()" >Dodaj nowe zgłoszenie</button>
-<button (click)="listReport()" >Lista zgłoszeń</button>
+            @if (currentUser()?.role == "admin" && data.category_counts) {
+                <h2 class="h4 mb-3">Liczba zgłoszeń danej kategorii</h2>
+                <ul class="list-group mb-4">
+                    @for (category of data.category_counts; track category.category__name) {
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ category.category__name }}</span>
+                            <span class="badge bg-secondary">{{ category.count }}</span>
+                        </li>
+                    }
+                </ul>
+            }
+
+            <h2 class="h4 mb-3">Zgłoszenia przypisane do Ciebie</h2>
+            <div class="list-group mb-4">
+                @for (report of data.assigned_to_me; track report.id) {
+                    <a (click)="reportDetails(report.id)" role="button" class="list-group-item list-group-item-action d-flex justify-content-between">
+                        <span>{{ report.title }}</span>
+                        <span class="text-muted">{{ report.priority }}</span>
+                    </a>
+                }
+            </div>
+        }
+    }
+
+    <button (click)="newReport()" class="btn btn-primary me-2">Dodaj nowe zgłoszenie</button>
+    <button (click)="listReport()" class="btn btn-outline-secondary">Lista zgłoszeń</button>
+</div>
