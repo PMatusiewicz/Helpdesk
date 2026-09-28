@@ -9,6 +9,7 @@ class User(AbstractUser):
         ADMIN = "admin", "Admin"
         
     role = models.CharField(max_length=20, default=Role.CLIENT, choices=Role)
+    email = models.EmailField(unique=True)
 
 class Category(models.Model):
     name = models.CharField(max_length=50)

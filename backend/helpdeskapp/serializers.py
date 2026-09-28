@@ -27,6 +27,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("Konto z tym adresem email juz istnieje")
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
