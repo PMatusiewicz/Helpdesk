@@ -89,7 +89,14 @@
                             <td>{{ report.status }}</td>
                             <td>{{ report.assigned_engineer ?? "Brak" }}</td>
                             <td>{{ report.creation_date | date: "short"}}</td>
-                            <td [style.color]="getSlaColor(report)" class="fw-semibold">{{ report.sla_deadline | date: "short" }}</td>
+                            <td [style.color]="getSlaColor(report)" class="fw-semibold">
+                                @if (report.assigned_engineer) {
+                                    <span class="text-muted">-</span>
+                                }
+                                @else () {
+                                    {{ report.sla_deadline | date: "short" }}
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>

@@ -9,7 +9,9 @@
                         <span class="badge bg-secondary">{{ report.priority }}</span>
                     </div>
                 </div>
-                <p class="text-danger fw-semibold">{{ slaCountdown() }}</p>
+                @if (!report.assigned_engineer) {
+                    <p class="text-danger fw-semibold">{{ slaCountdown() }}</p>
+                }
                 <div class="row mb-3">
                     <div class="col-md-4"><strong>Kategoria:</strong> {{ report.category }}</div>
                     <div class="col-md-4"><strong>Autor:</strong> {{ report.author }}</div>

@@ -248,7 +248,7 @@ class DashboardView(generics.GenericAPIView):
 
         new_unassigned = Report.objects.filter(status="NEW", assigned_engineer__isnull=True).count()
         my_in_progress = Report.objects.filter(status="IN_PROGRESS", assigned_engineer=request.user).count()
-        after_sla_time = Report.objects.filter(status__in=["NEW", "IN_PROGRESS"], sla_deadline__lt=timezone.now()).count()
+        after_sla_time = Report.objects.filter(status__in=["NEW"], sla_deadline__lt=timezone.now(), assigned_engineer__isnull=True).count()
         assigned_to_me = Report.objects.filter(assigned_engineer=request.user).order_by("-creation_date").select_related("category", "assigned_engineer")
 
         response_data = {

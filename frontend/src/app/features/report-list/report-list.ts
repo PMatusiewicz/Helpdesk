@@ -120,6 +120,9 @@ export class ReportList {
     }
 
     getSlaColor(report: ReportListItem) {
+        if (report.assigned_engineer) {
+            return "inherit"
+        }
         const timeLeft = new Date(report.sla_deadline).getTime() - Date.now()
         const slaTime = new Date(report.sla_deadline).getTime() - new Date(report.creation_date).getTime()
 

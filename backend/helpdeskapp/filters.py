@@ -18,4 +18,4 @@ class ReportFilter(django_filters.FilterSet):
     def by_sla_filter(self, queryset, name, value):
         if not value:
             return queryset
-        return queryset.filter(sla_deadline__lt=timezone.now())
+        return queryset.filter(sla_deadline__lt=timezone.now(), assigned_engineer_isnull=True)

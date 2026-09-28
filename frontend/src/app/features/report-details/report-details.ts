@@ -139,7 +139,7 @@ export class ReportDetails implements OnDestroy {
 
     updateSlaCountdown() {
         const report = this.reportData()
-        if (!report) {
+        if (!report || report.assigned_engineer) {
             return
         }
 
