@@ -16,6 +16,7 @@ export interface DashboardData {
     my_in_progress?: number
     after_sla_time?: number
     assigned_to_me?: ReportListItem[]
+    unassigned_reports?: ReportListItem[]
     category_counts?: { category__name: string, count: number }[]
 }
 
