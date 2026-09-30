@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import generics, permissions, filters, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer, DetailsReportSerializer, ChangeStatusSerializer, AssignEngineerByAdminSerializer, ChangePrioritySerializer, ReportHistorySerializer
-from .models import Report, Priorities, Category, User, ReportHistory
+from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer, DetailsReportSerializer, ChangeStatusSerializer, AssignEngineerByAdminSerializer, ChangePrioritySerializer, ReportHistorySerializer, CreateCommentSerializer, ListCommentSerializer
+from .models import Report, Priorities, Category, User, ReportHistory, Comment
 from django.utils import timezone
 from datetime import timedelta
 from django_filters import rest_framework as django_filters
@@ -295,3 +295,35 @@ class ReportHistoryView(generics.ListAPIView):
         else:
             report = get_object_or_404(Report, pk=report_pk)
         return ReportHistory.objects.filter(report=report).select_related("author").order_by("-creation_date")
+
+class ListCreateCommentView(generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer(self): #type: ignore
+        if self.request.method == "POST":
+            return CreateCommentSerializer
+        return ListCommentSerializer
+
+    def get_report(self):
+        report_pk = self.kwargs["pk"]
+        if self.request.user.role == "client": #type: ignore
+            return get_object_or_404(Report, pk=report_pk, author=self.request.user)
+        return get_object_or_404(Report, pk=report_pk)
+
+    def get_queryset(self): #type: ignore
+        report = self.get_report()
+        queryset = Comment.objects.filter(report=report).select_related("author").order_by("creation_date")
+        if self.request.user.role == "client": #type: ignore
+            queryset = queryset.filter(is_inner=False)
+        return queryset
+
+    def perform_create(self, serializer):
+        report = self.get_report()
+        user = self.request.user
+        serializer.save(author=user, report=report)
+
+        if user.role == "client" and report.status == "WAITING_FOR_CLIENT": #type: ignore
+            old_status = report.status
+            report.status = "IN_PROGRESS"
+            report.save()
+            log_history(report, user, "status", old_status, report.status)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Report, Category, ReportHistory
+from .models import User, Report, Category, ReportHistory, Comment
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -100,3 +100,21 @@ class ReportHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ReportHistory
         fields = ["field_name", "old_value", "new_value", "author", "creation_date"]
+
+class CreateCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ["description", "is_inner"]
+
+    def validate(self, attrs):
+        user = self.context["request"].user
+        if user.role == "client" and attrs.get("is_inner"):
+            raise serializers.ValidationError({"is_inner": "Klient nie może dodawać komentarzy wewnętrznych"})
+        return attrs
+
+class ListCommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(slug_field="username", read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ["id", "description", "author", "is_inner", "creation_date"]
