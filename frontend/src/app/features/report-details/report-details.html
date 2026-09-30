@@ -79,6 +79,56 @@
                 }
             </div>
         </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Komentarze</h2>
+
+                @for (comment of comments(); track comment.id) {
+                    <div class="mb-2 p-2 rounded" [class.bg-warning-subtle]="comment.is_inner" [class.bg-light]="!comment.is_inner">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ comment.author }}</strong>
+                            <span class="text-muted small">{{ comment.creation_date | date: "short" }}</span>
+                        </div>
+                        @if (comment.is_inner) {
+                            <span class="badge bg-warning text-dark mb-1">Wewnętrzny</span>
+                        }
+                        <p class="mb-0">{{ comment.description }}</p>
+                    </div>
+                } @empty {
+                    <p class="text-muted">Brak komentarzy</p>
+                }
+
+                <form [formGroup]="commentForm" (ngSubmit)="addComment()" class="mt-3">
+                    <div class="mb-2">
+                        <textarea formControlName="description" class="form-control" rows="2" placeholder="Dodaj komentarz..."></textarea>
+                    </div>
+                    @if (currentUser()?.role != "client") {
+                        <div class="form-check mb-2">
+                            <input type="checkbox" formControlName="is_inner" id="is_inner" class="form-check-input">
+                            <label for="is_inner" class="form-check-label">Komentarz wewnętrzny</label>
+                        </div>
+                    }
+                    <button type="submit" class="btn btn-primary">Dodaj komentarz</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Historia zmian</h2>
+                <ul class="list-group">
+                    @for (entry of history(); track $index) {
+                        <li class="list-group-item small">
+                            <strong>{{ entry.author }}</strong> zmienił <strong>{{ entry.field_name }}</strong>
+                            z „{{ entry.old_value }}" na „{{ entry.new_value }}”
+                            <span class="text-muted"> — {{ entry.creation_date | date: "short" }}</span>
+                        </li>
+                    } @empty {
+                        <li class="list-group-item text-muted">Brak historii zmian</li>
+                    }
+                </ul>
+            </div>
+        </div>
     }
 
     <div class="d-flex gap-2">

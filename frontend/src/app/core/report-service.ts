@@ -42,6 +42,14 @@ export interface ReportDetailsInterface {
     description: string,
 }
 
+export interface HistoryLog {
+    field_name: string,
+    old_value: string,
+    new_value: string,
+    author: string,
+    creation_date: string
+}
+
 @Service()
 export class ReportService {
     private http = inject(HttpClient)
@@ -105,5 +113,9 @@ export class ReportService {
 
     changePriority(id: string | number, priority: string) {
         return this.http.patch(`${environment.apiUrl}/reports/${id}/priority/`, {priority})
+    }
+
+    getHistory(id: string | number) {
+        return this.http.get<HistoryLog[]>(`${environment.apiUrl}/reports/${id}/history/`)
     }
 }

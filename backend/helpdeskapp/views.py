@@ -299,7 +299,7 @@ class ReportHistoryView(generics.ListAPIView):
 class ListCreateCommentView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_serializer(self): #type: ignore
+    def get_serializer_class(self): #type: ignore
         if self.request.method == "POST":
             return CreateCommentSerializer
         return ListCommentSerializer

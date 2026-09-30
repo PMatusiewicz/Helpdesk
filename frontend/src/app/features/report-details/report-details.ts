@@ -1,12 +1,14 @@
 import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ReportDetailsInterface, ReportService } from '../../core/report-service';
+import { HistoryLog, ReportDetailsInterface, ReportService } from '../../core/report-service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Auth, UserResponse } from '../../core/auth';
 import { EngineerResponse, EngineerService } from '../../core/engineer-service';
+import { Comment, CommentService } from '../../core/comment-service';
+import { DatePipe } from '@angular/common';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, DatePipe],
   selector: 'app-report-details',
   styleUrl: './report-details.css',
   templateUrl: './report-details.html',
@@ -17,6 +19,7 @@ export class ReportDetails implements OnDestroy {
     private route = inject(ActivatedRoute)
     private auth = inject(Auth)
     private engineer = inject(EngineerService)
+    private comment = inject(CommentService)
 
     reportId = Number(this.route.snapshot.paramMap.get("id"))
 
@@ -25,6 +28,8 @@ export class ReportDetails implements OnDestroy {
     engineers = signal<EngineerResponse[]>([])
     currentUser = signal<UserResponse | null>(null)
     slaCountdown = signal("")
+    comments = signal<Comment[]>([])
+    history = signal<HistoryLog[]>([])
 
     statusForm = new FormGroup({
         status: new FormControl("")
@@ -36,6 +41,11 @@ export class ReportDetails implements OnDestroy {
 
     priorityForm = new FormGroup({
         priority: new FormControl("")
+    })
+
+    commentForm = new FormGroup({
+        description: new FormControl(""),
+        is_inner: new FormControl(false)
     })
 
     private intervalId?: ReturnType<typeof setInterval>
@@ -52,6 +62,8 @@ export class ReportDetails implements OnDestroy {
         })
 
         this.intervalId = setInterval(() => this.updateSlaCountdown(), 1000)
+        this.loadComments()
+        this.loadHistory()
     }
 
     ngOnDestroy(): void {
@@ -154,5 +166,31 @@ export class ReportDetails implements OnDestroy {
 
         const formatted = `${hours}h ${minutes}min ${seconds}s`
         this.slaCountdown.set(isOverdue ? `Przekroczono o: ${formatted}` : `Pozostało: ${formatted}`)
+    }
+
+    loadComments() {
+        this.comment.getComments(this.reportId).subscribe(response => {
+            this.comments.set(response)
+        })
+    }
+
+    loadHistory() {
+        this.report.getHistory(this.reportId).subscribe(response => {
+            this.history.set(response)
+        })
+    }
+
+    addComment() {
+        const description = this.commentForm.value.description
+        if (!description) {
+            return
+        }
+
+        const isInner = this.commentForm.value.is_inner ?? false
+        this.comment.addComment(this.reportId, description, isInner).subscribe(() => {
+            this.commentForm.reset({description: "", is_inner: false})
+            this.loadComments()
+            this.refreshAll()
+        })
     }
 }
