@@ -1,9 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import generics, permissions, filters, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer, DetailsReportSerializer, ChangeStatusSerializer, AssignEngineerByAdminSerializer, ChangePrioritySerializer
-from .models import Report, Priorities, Category, User
+from .serializers import RegisterSerializer, UserSerializer, CreateReportSerializer, ListCategorySerializer, ListReportSerializer, ListEngineerSerializer, DetailsReportSerializer, ChangeStatusSerializer, AssignEngineerByAdminSerializer, ChangePrioritySerializer, ReportHistorySerializer
+from .models import Report, Priorities, Category, User, ReportHistory
 from django.utils import timezone
 from datetime import timedelta
 from django_filters import rest_framework as django_filters
@@ -112,6 +112,7 @@ class ChangeStatusView(generics.UpdateAPIView):
 
         report.status = new_status
         report.save()
+        log_history(report, request.user, "status", current_status, new_status)
 
         response_serializer = DetailsReportSerializer(report)
         return Response(response_serializer.data)
@@ -141,10 +142,16 @@ class AssignToMeView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        old_engineer = "Brak"
+        if report.assigned_engineer:
+            old_engineer = report.assigned_engineer
         report.assigned_engineer = request.user
         if report.status == "NEW":
+            old_status = report.status
             report.status = "IN_PROGRESS"
+            log_history(report, request.user, "status", old_status, report.status)
         report.save()
+        log_history(report, request.user, "assigned_engineer", old_engineer, request.user.username)
 
         response_serializer = DetailsReportSerializer(report)
         return Response(response_serializer.data)
@@ -172,10 +179,16 @@ class AssignEngineerByAdminView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         engineer = serializer.validated_data["engineer"]
+        old_engineer = "Brak"
+        if report.assigned_engineer:
+            old_engineer = report.assigned_engineer
         report.assigned_engineer = engineer
         if report.status == "NEW":
+            old_status = report.status
             report.status = "IN_PROGRESS"
+            log_history(report, request.user, "status", old_status, report.status)
         report.save()
+        log_history(report, request.user, "assigned_engineer", old_engineer, engineer.username)
 
         response_serializer = DetailsReportSerializer(report)
         return Response(response_serializer.data)
@@ -220,9 +233,11 @@ class ChangePriorityView(generics.UpdateAPIView):
         sla_time = Priorities.objects.get(priority=new_priority).sla
         new_sla_deadline = timezone.now() + timedelta(hours=sla_time)
 
+        old_priority = report.priority
         report.priority = new_priority
         report.sla_deadline = new_sla_deadline
         report.save()
+        log_history(report, request.user, "priority", old_priority, new_priority)
 
         response_serializer = DetailsReportSerializer(report)
         return Response(response_serializer.data)
@@ -265,3 +280,18 @@ class DashboardView(generics.GenericAPIView):
             response_data["category_counts"] = list(category_counts)
 
         return Response(response_data)
+
+def log_history(report, user, field_name, old_value, new_value):
+    ReportHistory.objects.create(report=report, author=user, field_name=field_name, old_value=str(old_value), new_value=str(new_value))
+
+class ReportHistoryView(generics.ListAPIView):
+    serializer_class = ReportHistorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self): #type: ignore
+        report_pk = self.kwargs["pk"]
+        if self.request.user.role == "client": #type: ignore
+            report = get_object_or_404(Report, pk=report_pk, author=self.request.user)
+        else:
+            report = get_object_or_404(Report, pk=report_pk)
+        return ReportHistory.objects.filter(report=report).select_related("author").order_by("-creation_date")

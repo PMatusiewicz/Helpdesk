@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Report, Category
+from .models import User, Report, Category, ReportHistory
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -93,3 +93,10 @@ class AssignEngineerByAdminSerializer(serializers.Serializer):
 
 class ChangePrioritySerializer(serializers.Serializer):
     priority = serializers.ChoiceField(choices=Report.Priority.choices)
+
+class ReportHistorySerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(slug_field="username", read_only=True)
+
+    class Meta:
+        model = ReportHistory
+        fields = ["field_name", "old_value", "new_value", "author", "creation_date"]
