@@ -1,6 +1,6 @@
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from django.urls import path
-from .views import RegisterView, UserView, ListCreateReportView, ListCategoryView, ListEngineerView, DetailsReportView, ChangeStatusView, AssignToMeView, AssignEngineerByAdminView, ListAvailableStatusView, ChangePriorityView, DashboardView, ReportHistoryView, ListCreateCommentView
+from .views import RegisterView, UserView, ListCreateReportView, ListCategoryView, ListEngineerView, DetailsReportView, ChangeStatusView, AssignToMeView, AssignEngineerByAdminView, ListAvailableStatusView, ChangePriorityView, DashboardView, ReportHistoryView, ListCreateCommentView, ToggleAutoCloseView
 
 urlpatterns = [
     path('token/', TokenObtainPairView.as_view()),
@@ -19,4 +19,5 @@ urlpatterns = [
     path('reports/<int:pk>/history/', ReportHistoryView.as_view()),
     path('reports/<int:pk>/comments/', ListCreateCommentView.as_view()),
     path('dashboard/', DashboardView.as_view()),
+    path('reports/<int:pk>/auto-close/', ToggleAutoCloseView.as_view())
 ]

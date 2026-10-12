@@ -83,7 +83,7 @@ class DetailsReportSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = Report
-        fields = ["id", "title", "status", "priority", "sla_deadline", "category", "author", "assigned_engineer", "description"]
+        fields = ["id", "title", "status", "priority", "sla_deadline", "category", "author", "assigned_engineer", "description", "auto_close_disabled"]
 
 class ChangeStatusSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=Report.Status.choices)

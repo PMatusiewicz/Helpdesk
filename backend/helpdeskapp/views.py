@@ -327,3 +327,23 @@ class ListCreateCommentView(generics.ListCreateAPIView):
             report.status = "IN_PROGRESS"
             report.save()
             log_history(report, user, "status", old_status, report.status)
+
+class ToggleAutoCloseView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Report.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        report = self.get_object()
+
+        if request.user.role == "client" and report.author != request.user:
+            return Response(
+                {"detail": "Klient może przełączać tą opcję tylko we własnych zgłoszeniach"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        old_value = report.auto_close_disabled
+        report.auto_close_disabled = not old_value
+        report.save()
+        log_history(report, request.user, "auto_closed_disabled", old_value, report.auto_close_disabled)
+
+        return Response(DetailsReportSerializer(report).data)

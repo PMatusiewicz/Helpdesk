@@ -17,6 +17,13 @@
                     <div class="col-md-4"><strong>Autor:</strong> {{ report.author }}</div>
                     <div class="col-md-4"><strong>Przypisany inżynier:</strong> {{ report.assigned_engineer ?? "Brak" }}</div>
                 </div>
+                @if (currentUser()?.role != "client" || report.author == currentUser()?.username) {
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="auto_close"
+                            [checked]="report.auto_close_disabled" (change)="toggleAutoClose()">
+                        <label class="form-check-label" for="auto_close">Automatyczne kończenie wyłączone</label>
+                    </div>
+                }
                 <p class="mb-0">{{ report.description }}</p>
             </div>
         </div>

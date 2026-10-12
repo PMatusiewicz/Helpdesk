@@ -40,6 +40,7 @@ export interface ReportDetailsInterface {
     author: string,
     assigned_engineer: string | null,
     description: string,
+    auto_close_disabled: boolean,
 }
 
 export interface HistoryLog {
@@ -104,7 +105,7 @@ export class ReportService {
     }
 
     assignToMe(id: string | number) {
-        return this.http.post(`${environment.apiUrl}/reports/${id}/assign-to-me/`, null)
+        return this.http.post(`${environment.apiUrl}/reports/${id}/assign-to-me/`, {})
     }
 
     assignEngineer(id: string | number, engineer_id: string | number) {
@@ -117,5 +118,9 @@ export class ReportService {
 
     getHistory(id: string | number) {
         return this.http.get<HistoryLog[]>(`${environment.apiUrl}/reports/${id}/history/`)
+    }
+
+    toggleAutoClose(id: string | number) {
+        return this.http.post(`${environment.apiUrl}/reports/${id}/auto-close/`, {})
     }
 }

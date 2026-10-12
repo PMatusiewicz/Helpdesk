@@ -88,6 +88,7 @@ export class ReportDetails implements OnDestroy {
     refreshAll() {
         this.loadReport()
         this.loadAvailableStatuses()
+        this.loadHistory()
     }
 
     changeStatus() {
@@ -190,6 +191,12 @@ export class ReportDetails implements OnDestroy {
         this.comment.addComment(this.reportId, description, isInner).subscribe(() => {
             this.commentForm.reset({description: "", is_inner: false})
             this.loadComments()
+            this.refreshAll()
+        })
+    }
+
+    toggleAutoClose() {
+        this.report.toggleAutoClose(this.reportId).subscribe(() => {
             this.refreshAll()
         })
     }
