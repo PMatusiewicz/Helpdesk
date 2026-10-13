@@ -9,8 +9,12 @@ from datetime import timedelta
 from django_filters import rest_framework as django_filters
 from .filters import ReportFilter
 from django.db.models import Count
+from django.core.mail import send_mail
 
 # Create your views here.
+def log_history(report, user, field_name, old_value, new_value):
+    ReportHistory.objects.create(report=report, author=user, field_name=field_name, old_value=str(old_value), new_value=str(new_value))
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
@@ -113,6 +117,18 @@ class ChangeStatusView(generics.UpdateAPIView):
         report.status = new_status
         report.save()
         log_history(report, request.user, "status", current_status, new_status)
+
+        if new_status == "WAITING_FOR_CLIENT":
+            send_mail(
+                subject=f"Zgłoszenie nr {report.pk} oczekuje na twoją odpowiedź",
+                message=(
+                    f"{report.author.username}, \n"
+                    f"Inżynier oczekuje na Twoją odpowiedź w zgłoszeniu \"{report.title}\""
+                    f"Dodaj komentarz w systemie, aby kontynuować obsługę zgłoszenia."
+                ),
+                from_email=None,
+                recipient_list=[report.author.email]
+            )
 
         response_serializer = DetailsReportSerializer(report)
         return Response(response_serializer.data)
@@ -280,9 +296,6 @@ class DashboardView(generics.GenericAPIView):
             response_data["category_counts"] = list(category_counts)
 
         return Response(response_data)
-
-def log_history(report, user, field_name, old_value, new_value):
-    ReportHistory.objects.create(report=report, author=user, field_name=field_name, old_value=str(old_value), new_value=str(new_value))
 
 class ReportHistoryView(generics.ListAPIView):
     serializer_class = ReportHistorySerializer
